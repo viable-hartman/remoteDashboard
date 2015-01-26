@@ -88,8 +88,8 @@ def launchyoutube(videoid=None):
 
 @task
 def killyoutube():
-    dashcommand("kill -9 $(pgrep omxplayer)", "Control")
-    dashcommand("kill $(pgrep yt)", "Control")
+    dashcommand("kill -9 $(pgrep omxplayer)")
+    dashcommand("kill $(pgrep yt)")
 
 
 @task

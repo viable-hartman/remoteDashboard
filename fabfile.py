@@ -134,6 +134,8 @@ def screenshot(width="889", height="600"):
             if result.failed:
                 abort(red("Failed to make remote screenshot directory."))
         local_path = "%s/screenshots" % (expanduser("~"))
+        if env.group:
+            local_path = "%s/%s" % (local_path, env.group)
         local_file = "%s/%s.png" % (local_path, env.host)
         if not isdir(local_path):
             result = local('mkdir -p "%s"' % (local_path))

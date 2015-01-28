@@ -1,10 +1,28 @@
 from __future__ import with_statement
 from os.path import expanduser, isdir
 from fabric.api import *
-from fabric.colors import red, green
+# from fabric.colors import red, green
 from fabric.contrib import files
+from slugify import slugify
 import urllib
 import json
+import os
+import sys
+from datetime import datetime
+from fabric.contrib import django
+from django.core.wsgi import get_wsgi_application
+from django.core.exceptions import FieldError
+from django.core.files.base import ContentFile
+
+
+# fabric-bolt replacements for fabric color.red function
+def red(strin):
+    return '<div class="forcedoutputred">%s</div>' % (strin)
+
+
+# fabric-bolt replacements for fabric color.green function
+def green(strin):
+    return '<div class="forcedoutputgreen">%s</div>' % (strin)
 
 
 @task
@@ -28,10 +46,10 @@ def actionscript(script, script_params=None, getstr=False):
 def dashcommand(command, screen_name=None, background=False, shouldkillX=False):
     with settings(warn_only=True):
         # local("git format-patch '%s^!' '%s' -o %s" % (rev, rev, patchdir))
-        print("BEFORE: %s") % (command)
+        # print("BEFORE: %s") % (command)
         # Escape single quotes
         command = command.replace("'", '"')
-        print("AFTER : %s") % (command)
+        # print("AFTER : %s") % (command)
         bg = ''
         if background:
             bg = '>/dev/null 2>&1 &'
@@ -93,20 +111,40 @@ def killyoutube():
 
 
 @task
+def install_packages(packages=None):
+    # We should sanitize packages here of course
+    # We should background the apt-get command and devise a strategy
+    # to check the background task. Maybe loop and cat a text file
+    # that apt-get redirects output until all background jobs exit.
+    sudo("apt-get update -y")
+    if packages:
+        sudo("apt-get install -y %s" % (packages))
+
+
+@task
 def whatareu():
-    resultd = {'ip': env.host}
-    with hide('output'):
-        result = run('hostname')
-        if result.failed:
-            abort(red("Failed to get hostname for %s." % (env.host)))
-        else:
-            resultd['name'] = result
-        result = run('grep -o "kiosk.*" ~/.xinitrc | grep -v DASHBOARD')
-        if result.failed:
-            abort(red("Failed to get dashboards for %s." % (env.host)))
-        else:
-            resultd['dashboards'] = result
-        print("%s") % (green(json.dumps(resultd)))
+    hostinfo = {}
+    with settings(warn_only=True):
+        with hide('output'):
+            # Check if facter is installed, and install if it isn't.
+            result = run("which facter")
+            if result.return_code != 0:
+                print(red("Missing facter package.  Attempting to install"))
+                install_packages(packages="facter")
+            # Get System information
+            result = run('facter --json')
+            if result.failed:
+                abort(red("Failed to get host data for %s." % (env.host)))
+            else:
+                hostinfo = json.loads(result)
+            # Get Dashboard info
+            result = run('awk \'/kiosk.*http/{s=""; for(i=4; i<=NF; i++) s=s $i " "; print s}\' ~/.xinitrc')
+            if result.failed:
+                print(red("Failed to get dashboards for %s." % (env.host)))
+            else:
+                hostinfo['dashboards'] = result.replace('"', '').split()
+            print("%s") % (green(json.dumps(hostinfo, sort_keys=True, indent=4)))
+            return hostinfo
 
 
 @task
@@ -123,25 +161,125 @@ def reboot():
         abort(red("Failed to create link."))
 
 
+def insertIntoGallery(
+    gallery_title,
+    gallery_slug,
+    screenshot,
+    title,
+    slug,
+    gallery_description="",
+    gallery_tags="",
+    caption="",
+    tags="",
+    fab_dir='/home/viable/.fabric-bolt'
+):
+    # Add custom fabric-bolt settings directory
+    sys.path.insert(0, fab_dir)
+    # Utilize django within fabfile
+    # Load custom fabric-bolt settings file
+    django.settings_module('settings')
+    # Loads the django Models
+    get_wsgi_application()
+    # Once loaded we can reference them
+    from photologue.models import Photo
+    from photologue.models import Gallery
+
+    file = open(screenshot, 'rb')
+    data = file.read()
+
+    # First Generate or Retrieve the Photo Model and save or update it
+    try:
+        photo = Photo.objects.get(slug=slug)
+        photo.date_added = datetime.now()
+        photo.date_taken = datetime.now()
+        print("~~~ FOUND existing Screenshot ~~~")
+    except Photo.DoesNotExist:
+        photo = Photo(title=title, slug=slug, caption=caption, is_public=True, tags=tags,)
+        print("~~~ CREATED new Screenshot ~~~")
+
+    try:
+        photo.image.save(os.path.basename(screenshot), ContentFile(data))
+    except FieldError:
+        # For some reason a field, 'photo,' is being passed to model as a field.
+        pass
+    print("~~~ SAVED Screenshot ~~~")
+
+    # Now Create or Retrieve the named Gallery and add the photo to it.
+    gallery = None
+    try:
+        gallery = Gallery.objects.get(title=gallery_title)
+        print("~~~ FOUND existing Screenshot Gallery ~~~")
+    except Gallery.DoesNotExist:
+        gallery = Gallery(title=gallery_title, slug=gallery_slug, description=gallery_description, is_public=True, tags=gallery_tags,)
+        gallery.save()
+        print("~~~ CREATED new Screenshot Gallery ~~~")
+
+    if gallery:
+        gallery.photos.add(photo)
+        print("~~~ Added Screenshot to Gallery ~~~")
+        print("<a target=\"_parent\" href=\"/photologue/gallery/%s\">View Screenshot Gallery %s</a>") % (gallery_title, gallery_title)
+
+    # Reset the syspath
+    sys.path.remove(fab_dir)
+
+
 @task
-def screenshot(width="889", height="600"):
-    # Future version should mkdir -p local and remote screenshot directories
-    if width.isdigit() and height.isdigit():
-        remote_path = '/home/pi/screenshots'
-        remote_file = "%s/current.png" % (remote_path)
-        if not files.exists(remote_path):
-            result = run('mkdir -p "%s"' % (remote_path))
+def screenshot(width="1440", height="810", ratio="75"):
+    with settings(warn_only=True):
+        if width.isdigit() and height.isdigit():
+            # Define remote image path and file
+            remote_path = '/home/%s/screenshots' % (env.user)
+            remote_file = "%s/current.png" % (remote_path)
+            # Check for raspi2png
+            screenshotcmd = "/usr/bin/raspi2png --pngname \"%s\" --width %d --height %d" % (remote_file, int(width), int(height))
+            result = run("which raspi2png")
+            if result.return_code != 0:
+                # If not using raspi2png we use scrot, which gnerates a thumb file
+                remote_thumb_file = "%s/current-thumb.png" % (remote_path)
+                screenshotcmd = "export DISPLAY=:0 && /usr/bin/scrot -t %d \"%s\" && mv '%s' '%s'" % (int(ratio), remote_file, remote_thumb_file, remote_file)
+
+            # Make remote directories if they don't already exist
+            if not files.exists(remote_path):
+                result = run('mkdir -p "%s"' % (remote_path))
+                if result.failed:
+                    abort(red("Failed to make remote screenshot directory."))
+
+            # Define local image path
+            local_path = "%s/screenshots" % (expanduser("~"))
+
+            # Define a global gallery for Web Interface
+            gallery_title = "ALL"
+            if hasattr(env, 'group'):
+                # If this stage contains a group, change the storage path and gallery to the group
+                local_path = "%s/%s" % (local_path, env.group)
+                gallery_title = env.group
+            # Define local image path
+            local_file = "%s/%s.png" % (local_path, env.host)
+
+            # Make local directories if they don't already exist
+            if not isdir(local_path):
+                result = local('mkdir -p "%s"' % (local_path))
+                if result.failed:
+                    abort(red("Failed to make local screenshot directory."))
+
+            # Take Remote Screenshot
+            dashcommand(screenshotcmd)
+            # Copy screenshot to central system
+            result = get(remote_path=remote_file, local_path=local_file)
             if result.failed:
-                abort(red("Failed to make remote screenshot directory."))
-        local_path = "%s/screenshots" % (expanduser("~"))
-        if env.group:
-            local_path = "%s/%s" % (local_path, env.group)
-        local_file = "%s/%s.png" % (local_path, env.host)
-        if not isdir(local_path):
-            result = local('mkdir -p "%s"' % (local_path))
-            if result.failed:
-                abort(red("Failed to make local screenshot directory."))
-        dashcommand("/usr/bin/raspi2png --pngname \"%s\" --width %d --height %d" % (remote_file, int(width), int(height)))
-        get(remote_path=remote_file, local_path=local_file)
-    else:
-        print("Values for width and height must be integers")
+                    abort(red("Failed to download screenshot."))
+            # Remove remote file
+            run("rm %s" % (remote_file))
+            print(green("Downloaded screenshot to %s" % (local_file)))
+            # Generate a photo title from local file name
+            screenshot_title = os.path.splitext(os.path.basename(local_file))[0]
+            # Insert photo into gallery.
+            insertIntoGallery(
+                gallery_title=gallery_title,
+                gallery_slug=slugify(gallery_title),
+                screenshot=local_file,
+                title=screenshot_title,
+                slug=slugify(screenshot_title),
+            )
+        else:
+            print("Values for width and height must be integers")

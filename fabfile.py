@@ -1,7 +1,7 @@
 from __future__ import with_statement
 from os.path import expanduser, isdir
 from fabric.api import *
-# from fabric.colors import red, green
+from fabric.colors import red, green
 from fabric.contrib import files
 from slugify import slugify
 import urllib
@@ -13,16 +13,6 @@ from fabric.contrib import django
 from django.core.wsgi import get_wsgi_application
 from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
-
-
-# fabric-bolt replacements for fabric color.red function
-def red(strin):
-    return '<div class="forcedoutputred">%s</div>' % (strin)
-
-
-# fabric-bolt replacements for fabric color.green function
-def green(strin):
-    return '<div class="forcedoutputgreen">%s</div>' % (strin)
 
 
 @task

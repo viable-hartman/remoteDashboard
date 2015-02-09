@@ -161,7 +161,7 @@ def insertIntoGallery(
     gallery_tags="",
     caption="",
     tags="",
-    fab_dir='/home/viable/.fabric-bolt'
+    fab_dir='%s/.fabric-bolt' % (os.path.expanduser('~/'))
 ):
     # Add custom fabric-bolt settings directory
     sys.path.insert(0, fab_dir)

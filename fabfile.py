@@ -68,12 +68,12 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def Refresh():
+def refresh():
     actionscript("refresh")
 
 
 @task
-def Start_Rotate():
+def startRotate():
     dashaction("Control", "rotatetab", '{"SLEEP":30,"TIMES":-1}')
 
 

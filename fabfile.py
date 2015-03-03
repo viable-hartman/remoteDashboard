@@ -15,6 +15,11 @@ from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
 
 
+if env.exclude:
+    env.exclude_hosts = json.loads(env.exclude)
+    print("Excluding %s") % (', '.join(env.exclude_hosts))
+
+
 @task
 def actionscript(script, script_params=None, getstr=False):
     with settings(warn_only=True):
@@ -63,8 +68,13 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def refresh():
-    actionscript("refresh");
+def Refresh():
+    actionscript("refresh")
+
+
+@task
+def Start_Rotate():
+    dashaction("Control", "rotatetab", '{"SLEEP":30,"TIMES":-1}')
 
 
 @task

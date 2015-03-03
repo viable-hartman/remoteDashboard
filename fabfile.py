@@ -15,7 +15,7 @@ from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
 
 
-env.exclude_hosts = json.loads(env.exclude)
+env.exclude_hosts = json.loads(env.exclude_hosts)
 
 
 @task

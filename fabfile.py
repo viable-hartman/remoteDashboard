@@ -22,7 +22,7 @@ def actionscript(script, script_params=None, getstr=False):
             if script_params:
                 cmd = "python xdotool.py -a %s.json -v '%s'" % (script, urllib.urlencode(json.loads(script_params)))
             else:
-                cmd = "python xdotool.py -a /home/pi/script/%s.json" % (script)
+                cmd = "python xdotool.py -a %s.json" % (script)
 
             if getstr:
                 return cmd
@@ -60,6 +60,11 @@ def dashaction(screen_name, script, script_params=None):
         command = actionscript(script, script_params, True)
         # print("Running %s") % (command)
         dashcommand(command, screen_name, True)
+
+
+@task
+def refresh():
+    actionscript("refresh");
 
 
 @task

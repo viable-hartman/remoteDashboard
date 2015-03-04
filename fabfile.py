@@ -16,12 +16,12 @@ from django.core.files.base import ContentFile
 
 
 @task
-def actionscript(script, script_params=None, getstr=False, nohup=""):
+def actionscript(script, script_params=None, getstr=False, nohup="", bg=""):
     with settings(warn_only=True):
         if script_params:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json -v '%s'" % (nohup, script, urllib.urlencode(json.loads(script_params)))
+            cmd = "cd ~/script/;%s python xdotool.py -a %s.json -v '%s' %s" % (nohup, script, urllib.urlencode(json.loads(script_params)), bg)
         else:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json" % (nohup, script)
+            cmd = "cd ~/script/;%s python xdotool.py -a %s.json %s" % (nohup, script, bg)
 
         if getstr:
             return cmd
@@ -77,7 +77,7 @@ def startRotate(exhosts=[]):
         if any(env.host in s for s in exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
-    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, "/usr/bin/nohup")
+    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, "/usr/bin/nohup", ">/dev/null 2>&1 &")
 
 
 @task

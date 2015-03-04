@@ -13,17 +13,6 @@ from fabric.contrib import django
 from django.core.wsgi import get_wsgi_application
 from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
-from functools import wraps
-
-
-def exhosts():
-    def closuref(func):
-        def innerclosuref(*args, **kwargs):
-            if env.exhosts:
-                env.exclude_hosts = json.loads(exhosts)
-            return func(*args, **kwargs)
-        return wraps(func)(innerclosuref)
-    return closuref
 
 
 @task
@@ -65,7 +54,6 @@ def dashcommand(command, screen_name=None, background=False, shouldkillX=False):
         abort(red("Dashboard command failed."))
 
 
-@exhosts
 @task
 def dashaction(screen_name, script, script_params=None):
     with cd('~/script'):
@@ -76,11 +64,15 @@ def dashaction(screen_name, script, script_params=None):
 
 @task
 def refresh():
+    if env.exhosts:
+        env.exclude_hosts = json.loads(env.exhosts)
     actionscript("refresh")
 
 
 @task
 def startRotate():
+    if env.exhosts:
+        env.exclude_hosts = json.loads(env.exhosts)
     dashaction("Control", "rotatetab", '{"SLEEP":30,"TIMES":-1}')
 
 

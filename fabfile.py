@@ -25,8 +25,11 @@ def actionscript(script, script_params=None, getstr=False, nohup="", bg=""):
 
         if getstr:
             return cmd
-        # result = run(cmd, pty=True)
-        result = run(cmd)
+
+        if nohup:
+            result = run(cmd, pty=True)
+        else:
+            result = run(cmd)
         if result.failed:
             abort(red("%s command failed." % (script)))
 
@@ -77,7 +80,7 @@ def startRotate(exhosts=[]):
         if any(env.host in s for s in exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
-    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, "/usr/bin/nohup", ">/dev/null 2>&1 &")
+    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, "/usr/bin/nohup", ">/tmp/rotate 2>&1 &")
 
 
 @task

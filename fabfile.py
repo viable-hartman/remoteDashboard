@@ -24,7 +24,7 @@ def actionscript(script, script_params=None, getstr=False, nohup=False):
             else:
                 cmd = "cd ~/script/;python xdotool.py -a %s.json -v '%s'" % (script, urllib.urlencode(json.loads(script_params)))
         else:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json %s" % (script)
+            cmd = "cd ~/script/;python xdotool.py -a %s.json" % (script)
 
         if getstr:
             return cmd

@@ -16,12 +16,15 @@ from django.core.files.base import ContentFile
 
 
 @task
-def actionscript(script, script_params=None, getstr=False, nohup="", bg=""):
+def actionscript(script, script_params=None, getstr=False, nohup=False):
     with settings(warn_only=True):
         if script_params:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json -v '%s' %s" % (nohup, script, urllib.urlencode(json.loads(script_params)), bg)
+            if nohup:
+                cmd = "cd ~/script/;nohup python xdotool.py -a %s.json -v '%s' >& /dev/null < /dev/null &" % (script, urllib.urlencode(json.loads(script_params)))
+            else:
+                cmd = "cd ~/script/;python xdotool.py -a %s.json -v '%s'" % (script, urllib.urlencode(json.loads(script_params)))
         else:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json %s" % (nohup, script, bg)
+            cmd = "cd ~/script/;%s python xdotool.py -a %s.json %s" % (script)
 
         if getstr:
             return cmd

@@ -83,7 +83,7 @@ def startRotate(exhosts=[]):
         if any(env.host in s for s in exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
-    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, "/usr/bin/nohup", "&")
+    actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, True)
 
 
 @task

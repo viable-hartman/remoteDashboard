@@ -63,16 +63,20 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def refresh():
-    if env.exhosts:
-        env.exclude_hosts = json.loads(env.exhosts)
+def refresh(exhosts=None):
+    if exhosts:
+        if any(env.host in s for s in json.loads(exhosts)):
+            print(green("Excluding host %s" % (env.host)))
+            return
     actionscript("refresh")
 
 
 @task
-def startRotate():
-    if env.exhosts:
-        env.exclude_hosts = json.loads(env.exhosts)
+def startRotate(exhosts=None):
+    if exhosts:
+        if any(env.host in s for s in json.loads(exhosts)):
+            print(green("Excluding host %s" % (env.host)))
+            return
     dashaction("Control", "rotatetab", '{"SLEEP":30,"TIMES":-1}')
 
 

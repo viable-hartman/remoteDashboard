@@ -18,18 +18,17 @@ from django.core.files.base import ContentFile
 @task
 def actionscript(script, script_params=None, getstr=False):
     with settings(warn_only=True):
-        with cd('~/script'):
-            if script_params:
-                cmd = "python xdotool.py -a %s.json -v '%s'" % (script, urllib.urlencode(json.loads(script_params)))
-            else:
-                cmd = "python xdotool.py -a %s.json" % (script)
+        if script_params:
+            cmd = "cd ~/script/;python xdotool.py -a %s.json -v '%s'" % (script, urllib.urlencode(json.loads(script_params)))
+        else:
+            cmd = "cd ~/script/;python xdotool.py -a %s.json" % (script)
 
-            if getstr:
-                return cmd
-            # result = run(cmd, pty=True)
-            result = run(cmd)
-            if result.failed:
-                abort(red("%s command failed." % (script)))
+        if getstr:
+            return cmd
+        # result = run(cmd, pty=True)
+        result = run(cmd)
+        if result.failed:
+            abort(red("%s command failed." % (script)))
 
 
 @task
@@ -56,10 +55,9 @@ def dashcommand(command, screen_name=None, background=False, shouldkillX=False):
 
 @task
 def dashaction(screen_name, script, script_params=None):
-    with cd('~/script'):
-        command = actionscript(script, script_params, True)
-        # print("Running %s") % (command)
-        dashcommand(command, screen_name, True)
+    command = actionscript(script, script_params, True)
+    # print("Running %s") % (command)
+    dashcommand(command, screen_name, True)
 
 
 @task

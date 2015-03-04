@@ -19,9 +19,9 @@ from django.core.files.base import ContentFile
 def actionscript(script, script_params=None, getstr=False, nohup="", bg=""):
     with settings(warn_only=True):
         if script_params:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json -v '%s' %s" % (nohup, script, urllib.urlencode(json.loads(script_params)), bg)
+            cmd = "cd ~/script/;%s \"python xdotool.py -a %s.json -v '%s' %s\"" % (nohup, script, urllib.urlencode(json.loads(script_params)), bg)
         else:
-            cmd = "cd ~/script/;%s python xdotool.py -a %s.json %s" % (nohup, script, bg)
+            cmd = "cd ~/script/;%s \"python xdotool.py -a %s.json %s\"" % (nohup, script, bg)
 
         if getstr:
             return cmd

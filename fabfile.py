@@ -63,7 +63,7 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def refresh(exhosts=None):
+def refresh(exhosts=False):
     if exhosts:
         if any(env.host in s for s in json.loads(exhosts)):
             print(green("Excluding host %s" % (env.host)))
@@ -72,7 +72,7 @@ def refresh(exhosts=None):
 
 
 @task
-def startRotate(exhosts=None):
+def startRotate(exhosts=False):
     if exhosts:
         if any(env.host in s for s in json.loads(exhosts)):
             print(green("Excluding host %s" % (env.host)))

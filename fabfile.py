@@ -17,10 +17,9 @@ from django.core.files.base import ContentFile
 
 @task
 def Set_Default_Dashboard(json_urls):
-    urls = json.loads(urls)
-    print green(json.dumps(urls))
+    env.urls = json.loads(json_urls)
     with lcd(os.path.dirname(os.path.realpath(__file__))):
-	files.upload_template(filename='xinitrc.tmpl', destination='/home/pi/test_xinitrc', template_dir='./templates', context=urls, use_jinja=True)
+	files.upload_template(filename='xinitrc.tmpl', destination='/home/pi/test_xinitrc', template_dir='./templates', context=env, use_jinja=True)
 
 
 @task

@@ -16,6 +16,13 @@ from django.core.files.base import ContentFile
 
 
 @task
+def Set_Default_Dashboard():
+    print green(os.path.dirname(os.path.realpath(__file__)))
+    with lcd(os.path.dirname(os.path.realpath(__file__))):
+        upload_template(filename='xinitrc.tmpl', destination='/home/pi/test_xinitrc', template_dir='./templates', context=context[hostname], use_jinja=True)
+
+
+@task
 def actionscript(script, script_params=None, getstr=False, nohup=False):
     with settings(warn_only=True):
         if script_params:
@@ -67,7 +74,7 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def refresh(exhosts=[]):
+def Refresh(exhosts=[]):
     exhosts = json.loads(exhosts)
     if exhosts:
         if any(env.host in s for s in exhosts):
@@ -77,7 +84,7 @@ def refresh(exhosts=[]):
 
 
 @task
-def startRotate(exhosts=[]):
+def Start_Rotate(exhosts=[]):
     exhosts = json.loads(exhosts)
     if exhosts:
         if any(env.host in s for s in exhosts):
@@ -87,7 +94,7 @@ def startRotate(exhosts=[]):
 
 
 @task
-def launchX(envvars=None):
+def Launch_X(envvars=None):
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)
     envdict = {}
     try:

@@ -37,6 +37,6 @@ while true; do
         chromium --disable-hang-monitor --kiosk "${DASHBOARD}"
     else
         echo "Launching default dashboard..."
-        chromium --disable-hang-monitor --kiosk  "http://graphs.build.com/#/dashboard/db/Order%20Management%20-%201"
+        chromium --disable-hang-monitor --kiosk {% for url in urls %} "{{ url }}" {% endfor %}
     fi
 done;

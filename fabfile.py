@@ -24,7 +24,7 @@ def Set_Default_Dashboard(json_urls, tmpl_filename, exhosts=[]):
             return
     env.urls = json.loads(json_urls)
     with lcd(os.path.dirname(os.path.realpath(__file__))):
-	files.upload_template(filename=tmpl_filename, destination='/home/pi/.xinitrc', template_dir='./templates', context=env, use_jinja=True)
+	files.upload_template(filename=tmpl_filename, destination='/home/pi/.xinitrc', template_dir='./templates', context=env, use_jinja=True, use_sudo=True)
 
 
 @task
@@ -99,7 +99,12 @@ def Start_Rotate(exhosts=[]):
 
 
 @task
-def Launch_X(envvars=None):
+def Launch_X(envvars=None, exhosts=[]):
+    exhosts = json.loads(exhosts)
+    if exhosts:
+        if any(env.host in s for s in exhosts):
+            print(green("Excluding host %s" % (env.host)))
+            return
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)
     envdict = {}
     try:

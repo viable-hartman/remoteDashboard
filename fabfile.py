@@ -19,7 +19,7 @@ from django.core.files.base import ContentFile
 def Set_Default_Dashboard():
     print green(os.path.dirname(os.path.realpath(__file__)))
     with lcd(os.path.dirname(os.path.realpath(__file__))):
-        upload_template(filename='xinitrc.tmpl', destination='/home/pi/test_xinitrc', template_dir='./templates', context=context[hostname], use_jinja=True)
+	files.upload_template(filename='xinitrc.tmpl', destination='/home/pi/test_xinitrc', template_dir='./templates', context=None, use_jinja=True)
 
 
 @task

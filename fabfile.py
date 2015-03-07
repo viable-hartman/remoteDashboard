@@ -13,6 +13,7 @@ from fabric.contrib import django
 from django.core.wsgi import get_wsgi_application
 from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
+from functools import wraps
 
 
 def excludehosts():

@@ -15,16 +15,25 @@ from django.core.exceptions import FieldError
 from django.core.files.base import ContentFile
 
 
+def excludehosts():
+    def closuref(func):
+        def innerclosuref(*args, **kwargs):
+            exhosts = json.loads(env.exhosts)
+            if exhosts:
+                if any(env.host in s for s in exhosts):
+                    print(green("Excluding host %s" % (env.host)))
+                    return
+            return func(*args, **kwargs)
+        return wraps(func)(innerclosuref)
+    return closuref
+
+
+@excludehosts
 @task
 def Set_Default_Dashboard(json_urls, tmpl_filename):
-    env.exhosts = json.loads(env.exhosts)
-    if env.exhosts:
-        if any(env.host in s for s in env.exhosts):
-            print(green("Excluding host %s" % (env.host)))
-            return
     env.urls = json.loads(json_urls)
     with lcd(os.path.dirname(os.path.realpath(__file__))):
-	files.upload_template(filename=tmpl_filename, destination='/home/pi/.xinitrc', template_dir='./templates', context=env, use_jinja=True, use_sudo=True)
+        files.upload_template(filename=tmpl_filename, destination='/home/pi/.xinitrc', template_dir='./templates', context=env, use_jinja=True, use_sudo=True)
 
 
 @task
@@ -78,33 +87,21 @@ def dashaction(screen_name, script, script_params=None):
     dashcommand(command, screen_name, True)
 
 
+@excludehosts
 @task
 def Refresh():
-    env.exhosts = json.loads(env.exhosts)
-    if env.exhosts:
-        if any(env.host in s for s in env.exhosts):
-            print(green("Excluding host %s" % (env.host)))
-            return
     actionscript("refresh")
 
 
+@excludehosts
 @task
 def Start_Rotate():
-    env.exhosts = json.loads(env.exhosts)
-    if env.exhosts:
-        if any(env.host in s for s in env.exhosts):
-            print(green("Excluding host %s" % (env.host)))
-            return
     actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, True)
 
 
+@excludehosts
 @task
 def Launch_X(envvars=None):
-    env.exhosts = json.loads(env.exhosts)
-    if env.exhosts:
-        if any(env.host in s for s in env.exhosts):
-            print(green("Excluding host %s" % (env.host)))
-            return
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)
     envdict = {}
     try:

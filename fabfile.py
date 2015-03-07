@@ -16,10 +16,10 @@ from django.core.files.base import ContentFile
 
 
 @task
-def Set_Default_Dashboard(json_urls, tmpl_filename, exhosts=[]):
-    exhosts = json.loads(exhosts)
-    if exhosts:
-        if any(env.host in s for s in exhosts):
+def Set_Default_Dashboard(json_urls, tmpl_filename):
+    env.exhosts = json.loads(env.exhosts)
+    if env.exhosts:
+        if any(env.host in s for s in env.exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
     env.urls = json.loads(json_urls)
@@ -79,30 +79,30 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-def Refresh(exhosts=[]):
-    exhosts = json.loads(exhosts)
-    if exhosts:
-        if any(env.host in s for s in exhosts):
+def Refresh():
+    env.exhosts = json.loads(env.exhosts)
+    if env.exhosts:
+        if any(env.host in s for s in env.exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
     actionscript("refresh")
 
 
 @task
-def Start_Rotate(exhosts=[]):
-    exhosts = json.loads(exhosts)
-    if exhosts:
-        if any(env.host in s for s in exhosts):
+def Start_Rotate():
+    env.exhosts = json.loads(env.exhosts)
+    if env.exhosts:
+        if any(env.host in s for s in env.exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
     actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, True)
 
 
 @task
-def Launch_X(envvars=None, exhosts=[]):
-    exhosts = json.loads(exhosts)
-    if exhosts:
-        if any(env.host in s for s in exhosts):
+def Launch_X(envvars=None):
+    env.exhosts = json.loads(env.exhosts)
+    if env.exhosts:
+        if any(env.host in s for s in env.exhosts):
             print(green("Excluding host %s" % (env.host)))
             return
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)

@@ -16,17 +16,15 @@ from django.core.files.base import ContentFile
 from functools import wraps
 
 
-def excludehosts():
-    def closuref(func):
-        def innerclosuref(*args, **kwargs):
-            exhosts = json.loads(env.exhosts)
-            if exhosts:
-                if any(env.host in s for s in exhosts):
-                    print(green("Excluding host %s" % (env.host)))
-                    return
-            return func(*args, **kwargs)
-        return wraps(func)(innerclosuref)
-    return closuref
+def excludehosts(func):
+    def closuref(*args, **kwargs):
+        exhosts = json.loads(env.exhosts)
+        if exhosts:
+            if any(env.host in s for s in exhosts):
+                print(green("Excluding host %s" % (env.host)))
+                return
+        return func(*args, **kwargs)
+    return wraps(func)(closuref)
 
 
 @excludehosts

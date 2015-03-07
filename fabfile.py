@@ -27,8 +27,8 @@ def excludehosts(func):
     return wraps(func)(closuref)
 
 
-@excludehosts
 @task
+@excludehosts
 def Set_Default_Dashboard(json_urls, tmpl_filename):
     env.urls = json.loads(json_urls)
     with lcd(os.path.dirname(os.path.realpath(__file__))):
@@ -86,20 +86,20 @@ def dashaction(screen_name, script, script_params=None):
     dashcommand(command, screen_name, True)
 
 
-@excludehosts
 @task
+@excludehosts
 def Refresh():
     actionscript("refresh")
 
 
-@excludehosts
 @task
+@excludehosts
 def Start_Rotate():
     actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, True)
 
 
-@excludehosts
 @task
+@excludehosts
 def Launch_X(envvars=None):
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)
     envdict = {}

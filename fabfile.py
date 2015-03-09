@@ -24,6 +24,10 @@ def excludehosts(func):
                 print(green("Excluding host %s" % (env.host)))
                 return
         return func(*args, **kwargs)
+    # This is necessary so that custom decorator is interpreted as fabric decorator
+    # Fabric fix: https://github.com/mvk/fabric/commit/68601ae817c5c26f4937f0d04cb56e2ba8ca1e04
+    # is also necessary.
+    closuref.func_dict['wrapped'] = func
     return wraps(func)(closuref)
 
 

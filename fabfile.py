@@ -128,6 +128,7 @@ def killX(xlock="/tmp/.X0-lock"):
 
 
 @task
+@excludehosts
 def launchyoutube(videoid=None):
     dashcommand("yt --player omxplayer", "Dashboard", shouldkillX=True)
     if videoid:
@@ -136,12 +137,14 @@ def launchyoutube(videoid=None):
 
 
 @task
+@excludehosts
 def killyoutube():
     dashcommand("kill -9 $(pgrep omxplayer)")
     dashcommand("kill $(pgrep yt)")
 
 
 @task
+@excludehosts
 def install_packages(packages=None):
     # We should sanitize packages here of course
     # We should background the apt-get command and devise a strategy
@@ -153,6 +156,7 @@ def install_packages(packages=None):
 
 
 @task
+@excludehosts
 def whatareu():
     hostinfo = {}
     with settings(warn_only=True):
@@ -186,6 +190,7 @@ def nsslink(nssdir='/usr/lib/arm-linux-gnueabihf/nss', linkto='/usr/lib/nss'):
 
 
 @task
+@excludehosts
 def reboot():
     result = sudo("reboot")
     if result.failed:

@@ -141,6 +141,11 @@ def Change_Task(action, action_args_json):
 
 
 @task
+def Mirror_Screen(hostname, host_password):
+    Change_Task("VNC", '{"VNCPASS": "%s", "VNCSERVER": "%s:5900"}' % (host_password, hostname))
+
+
+@task
 @excludehosts
 def launchyoutube(videoid=None):
     dashcommand("yt --player omxplayer", "Dashboard", shouldkillX=True)

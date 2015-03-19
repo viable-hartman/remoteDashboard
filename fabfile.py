@@ -134,7 +134,7 @@ def Change_Task(action, action_args_json):
     run("echo \"ACTION=%s\" > /tmp/appmanager" % (action))
     # Expect to get Key/Value pairs that get exported as ENV variables
     action_args = json.loads(action_args_json)
-    for k, v in action_args:
+    for k, v in action_args.iteritems():
         run("echo \"%s=%s\" > /tmp/appmanager" % (k, v))
     # Finally tell X to initiate the new command
     run("echo \"quit\" > /tmp/appmanager")

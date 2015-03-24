@@ -40,6 +40,13 @@ def Set_Default_Dashboard(json_urls, tmpl_filename):
 
 
 @task
+@excludehosts
+def getEnv():
+    print(json.dumps(env))
+    return True
+
+
+@task
 def actionscript(script, script_params=None, getstr=False, nohup=False):
     with settings(warn_only=True):
         if script_params:

@@ -153,6 +153,11 @@ def Mirror_Screen(host_password):
 
 
 @task
+def Share_Mouse_and_Keyboard():
+    Change_Task("MOUSE", '{"MOUSESERVER": "%s"}' % (env.remote_host))
+
+
+@task
 @excludehosts
 def launchyoutube(videoid=None):
     dashcommand("yt --player omxplayer", "Dashboard", shouldkillX=True)

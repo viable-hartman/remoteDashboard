@@ -148,7 +148,7 @@ def Change_Task(action, action_args_json):
 
 
 @task
-def Mirror_Screen(hostname, host_password):
+def Mirror_Screen(host_password):
     Change_Task("VNC", '{"VNCPASS": "%s", "VNCSERVER": "%s:5900"}' % (host_password, env.remote_host))
 
 

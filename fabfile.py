@@ -154,7 +154,7 @@ def Mirror_Screen(host_password):
 
 @task
 def Share_Mouse_and_Keyboard():
-    Change_Task("MOUSE", '{"MOUSESERVER": "%s"}' % (env.remote_host))
+    run("synergyc --name %s %s" % (env.host, env.remote_host))
 
 
 @task

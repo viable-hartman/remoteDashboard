@@ -153,6 +153,11 @@ def Mirror_Screen(host_password):
 
 
 @task
+def Stop_Mouse_and_Keyboard():
+    run("killall synergyc")
+
+
+@task
 def Share_Mouse_and_Keyboard():
     run("synergyc --name %s %s" % (env.host, env.remote_host))
 

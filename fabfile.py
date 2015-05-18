@@ -20,6 +20,7 @@ def excludehosts(func):
     def closuref(*args, **kwargs):
         exhosts = json.loads(env.exhosts)
         if exhosts:
+            print(green("Verifying host %s") % (env.host))
             if any(env.host in s for s in exhosts):
                 print(green("Excluding host %s" % (env.host)))
                 return

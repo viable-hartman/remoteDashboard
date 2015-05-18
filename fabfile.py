@@ -47,6 +47,7 @@ def getEnv():
 
 
 @task
+@excludehosts
 def actionscript(script, script_params=None, getstr=False, nohup=False):
     with settings(warn_only=True):
         if script_params:
@@ -69,6 +70,7 @@ def actionscript(script, script_params=None, getstr=False, nohup=False):
 
 
 @task
+@excludehosts
 def dashcommand(command, screen_name=None, background=False, shouldkillX=False):
     with settings(warn_only=True):
         # local("git format-patch '%s^!' '%s' -o %s" % (rev, rev, patchdir))
@@ -98,19 +100,16 @@ def dashaction(screen_name, script, script_params=None):
 
 
 @task
-@excludehosts
 def Refresh():
     actionscript("refresh")
 
 
 @task
-@excludehosts
 def Start_Rotate():
     actionscript("rotatetab", '{"SLEEP":30,"TIMES":-1}', False, True)
 
 
 @task
-@excludehosts
 def Launch_X(envvars=None):
     dashcommand('unset ACTION', "Dashboard", shouldkillX=True)
     envdict = {}
@@ -124,6 +123,7 @@ def Launch_X(envvars=None):
 
 
 @task
+@excludehosts
 def killX(xlock="/tmp/.X0-lock"):
     if files.exists(xlock):
         result = run("kill $(<'%s')" % (xlock))
@@ -148,22 +148,24 @@ def Change_Task(action, action_args_json):
 
 
 @task
+@excludehosts
 def Mirror_Screen(host_password):
     Change_Task("VNC", '{"VNCPASS": "%s", "VNCSERVER": "%s:5900"}' % (host_password, env.remote_host))
 
 
 @task
+@excludehosts
 def Stop_Mouse_and_Keyboard():
     run("killall synergyc")
 
 
 @task
+@excludehosts
 def Share_Mouse_and_Keyboard():
     run("synergyc --name %s %s" % (env.host, env.remote_host))
 
 
 @task
-@excludehosts
 def launchyoutube(videoid=None):
     dashcommand("yt --player omxplayer", "Dashboard", shouldkillX=True)
     if videoid:
@@ -172,7 +174,6 @@ def launchyoutube(videoid=None):
 
 
 @task
-@excludehosts
 def killyoutube():
     dashcommand("kill -9 $(pgrep omxplayer)")
     dashcommand("kill $(pgrep yt)")
